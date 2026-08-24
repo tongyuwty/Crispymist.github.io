@@ -1,91 +1,42 @@
-# ──────────────────────────────────────
-# 站点基础配置
-# ──────────────────────────────────────
-title: "crispymist"
-name: "crispymist"
-description: "双语编译 · 原创内容 · 社交媒体运营"
+title: "My Portfolio"
+description: "双语编译 · 原创内容"
 url: "https://crispymist.github.io"
-baseurl: ""
-
-# ──────────────────────────────────────
-# 主题和外观
-# ──────────────────────────────────────
 theme: minimal-mistakes-jekyll
-minimal_mistakes_skin: "air"        # 可选: default/air/contrast/dark/mint/neon
+minimal_mistakes_skin: "air"
 locale: "zh-CN"
-
-# ──────────────────────────────────────
-# 作者信息（会显示在页面底部和文章侧栏）
-# ──────────────────────────────────────
-author:
-  name: "吴桐雨"
-  avatar: "/assets/images/profile.jpg"
-  bio: "把复杂的世界翻译成能读懂的故事"
-  location: "宁波"
-  links:
-    - label: "小红书"
-      icon: "fab fa-instagram"       # 没有小红书图标，用Instagram替代
-      url: "https://www.xiaohongshu.com/user/profile/【你的ID】"
-    - label: "Email"
-      icon: "fas fa-envelope"
-      url: "mailto:tongyu.wuty@gmail.com"
-    - label: "GitHub"
-      icon: "fab fa-github"
-      url: "https://github.com/crispymist"
-
-# ──────────────────────────────────────
-# 导航菜单
-# ──────────────────────────────────────
-defaults:
-  - scope:
-      path: ""
-      type: pages
-    values:
-      layout: single
-      author_profile: true
-  - scope:
-      path: ""
-      type: posts
-    values:
-      layout: single
-      author_profile: true
-      read_time: true
-  - scope:
-      path: ""
-      type: portfolio
-    values:
-      layout: single
-      author_profile: true
-      read_time: true
-
-# ──────────────────────────────────────
-# 集合（Collections）—— 你的核心内容区
-# ──────────────────────────────────────
-collections:
-  portfolio:
-    output: true
-    sort_by: date
-
-# ──────────────────────────────────────
-# 其他设置
-# ──────────────────────────────────────
 search: true
-markdown: kramdown
-kramdown:
-  input: GFM
+
+author:
+  name: "吴桐雨"
+  bio: "把复杂的世界翻译成能读懂的故事"
+  links:
+    - label: "Email"
+      icon: "fas fa-envelope"
+      url: "mailto:tongyu.wuty@gmail.com"
+
+defaults:
+  - scope:
+      path: ""
+      type: pages
+    values:
+      layout: single
+      author_profile: true
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: single
+      author_profile: true
+      read_time: true
+
+collections:
+  portfolio:
+    output: true
+    sort_by: date
 
 plugins:
-  - jekyll-paginate
-  - jekyll-sitemap
-  - jekyll-gist
-  - jekyll-feed
-  - jekyll-include-cache
-
-whitelist:
-  - jekyll-paginate
-  - jekyll-sitemap
-  - jekyll-gist
-  - jekyll-feed
-  - jekyll-include-cache
-
-
+  - jekyll-paginate
+  - jekyll-sitemap
+  - jekyll-gist
+  - jekyll-feed
+  - jekyll-include-cache
