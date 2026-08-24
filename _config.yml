@@ -1,8 +1,7 @@
 title: "My Portfolio"
 description: "双语编译 · 原创内容"
 url: "https://crispymist.github.io"
-theme: minimal-mistakes-jekyll
-minimal_mistakes_skin: "air"
+skin: "air"
 locale: "zh-CN"
 search: true
 
