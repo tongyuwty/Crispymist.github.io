@@ -1,4 +1,4 @@
---
+---
 title: "原创文章"
 permalink: /originals/
 layout: archive
