@@ -1,0 +1,13 @@
+
+  - title: "首页"
+    url: /
+  - title: "编译作品"
+    url: /translations/
+  - title: "原创文章"
+    url: /originals/
+  - title: "社交媒体"
+    url: /social/
+  - title: "关于我"
+    url: /about/
+
+
