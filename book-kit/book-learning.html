@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>《如何阅读一本书》· 交互式学习包</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #f7f8fa;
+            color: #1e293b;
+            padding: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1,
+        h2,
+        h3 {
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+        h1 {
+            font-size: 2rem;
+            border-left: 6px solid #3b82f6;
+            padding-left: 16px;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            color: #64748b;
+            margin-bottom: 32px;
+            padding-left: 22px;
+            font-size: 1rem;
+        }
+        .card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px 28px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+            margin-bottom: 28px;
+            border: 1px solid #e9edf2;
+        }
+        .card h2 {
+            font-size: 1.3rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card h2 .badge {
+            font-size: 0.7rem;
+            background: #dbeafe;
+            color: #1d4ed8;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        /* 进度条 */
+        .progress-section {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 16px 24px;
+            background: #f1f5f9;
+            padding: 16px 24px;
+            border-radius: 40px;
+            margin-bottom: 28px;
+        }
+        .progress-track {
+            flex: 1;
+            min-width: 120px;
+        }
+        .progress-track .bar-bg {
+            height: 8px;
+            background: #d1d9e6;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .progress-track .bar-fill {
+            height: 100%;
+            width: 0%;
+            background: #3b82f6;
+            border-radius: 8px;
+            transition: width 0.4s ease;
+        }
+        .progress-stats {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #1e293b;
+            white-space: nowrap;
+        }
+        .task-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 20px;
+            margin-top: 8px;
+        }
+        .task-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+            color: #334155;
+            cursor: pointer;
+        }
+        .task-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #3b82f6;
+            cursor: pointer;
+        }
+        .task-item.done {
+            text-decoration: line-through;
+            color: #94a3b8;
+        }
+
+        /* 知识图谱容器 */
+        .graph-container {
+            width: 100%;
+            overflow-x: auto;
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #e9edf2;
+            padding: 12px 0;
+            margin-bottom: 8px;
+        }
+        .graph-container svg {
+            display: block;
+            width: 100%;
+            height: auto;
+            min-height: 420px;
+            max-height: 600px;
+            background: #ffffff;
+            cursor: default;
+        }
+        .graph-tip {
+            font-size: 0.85rem;
+            color: #64748b;
+            text-align: center;
+            padding: 4px 0 16px 0;
+        }
+
+        /* 节点与边 */
+        .node-group {
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .node-group text {
+            font-size: 12px;
+            font-weight: 500;
+            fill: #1e293b;
+            text-anchor: middle;
+            dominant-baseline: central;
+            pointer-events: none;
+            user-select: none;
+        }
+        .edge {
+            stroke: #94a3b8;
+            stroke-width: 2;
+            fill: none;
+            transition: stroke 0.2s, opacity 0.2s;
+        }
+        .edge-label {
+            font-size: 9px;
+            fill: #64748b;
+            text-anchor: middle;
+            dominant-baseline: central;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        /* 信息卡片 */
+        .info-panel {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px 24px;
+            min-height: 80px;
+            border-left: 4px solid #3b82f6;
+            margin-top: 16px;
+            transition: border-color 0.3s;
+        }
+        .info-panel .info-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #0f172a;
+        }
+        .info-panel .info-desc {
+            color: #334155;
+            margin-top: 6px;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+        .info-panel .info-empty {
+            color: #94a3b8;
+            font-style: italic;
+        }
+
+        /* 测验区 */
+        .quiz-item {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            border: 1px solid #e9edf2;
+            transition: background 0.15s;
+        }
+        .quiz-item .q {
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        .quiz-item .options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 20px;
+            font-size: 0.95rem;
+            color: #1e293b;
+            margin: 6px 0 8px 0;
+        }
+        .quiz-item .options label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+        }
+        .quiz-item .options input[type="radio"] {
+            accent-color: #3b82f6;
+        }
+        .quiz-item .btn-reveal {
+            background: #e9edf2;
+            border: none;
+            padding: 4px 16px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            color: #1e293b;
+            font-weight: 500;
+            transition: background 0.15s;
+        }
+        .quiz-item .btn-reveal:hover {
+            background: #d1d9e6;
+        }
+        .quiz-item .answer {
+            margin-top: 8px;
+            padding: 10px 14px;
+            background: #dbeafe;
+            border-radius: 8px;
+            color: #1d4ed8;
+            display: none;
+            font-size: 0.95rem;
+        }
+        .quiz-item .answer.show {
+            display: block;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 12px;
+            }
+            .card {
+                padding: 16px;
+            }
+            .progress-section {
+                flex-direction: column;
+                align-items: stretch;
+                border-radius: 20px;
+                padding: 16px;
+            }
+            .task-grid {
+                flex-direction: column;
+                gap: 4px;
+            }
+            .graph-container svg {
+                min-height: 320px;
+            }
+            h1 {
+                font-size: 1.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>📖 如何阅读一本书</h1>
+    <div class="subtitle">交互式学习包 · 莫提默·J·艾德勒 &amp; 查尔斯·范多伦</div>
+
+    <!-- 进度 -->
+    <div class="card" style="padding:16px 20px;">
+        <div class="progress-section" style="margin-bottom:0;padding:0;background:transparent;border-radius:0;gap:12px;">
+            <div class="progress-track">
+                <div class="bar-bg"><div class="bar-fill" id="progressFill"></div></div>
+            </div>
+            <div class="progress-stats" id="progressStats">0 / 6 已完成</div>
+        </div>
+        <div class="task-grid" id="taskGrid">
+            <label class="task-item" data-task="0"><input type="checkbox" /> 第1天：基础 &amp; 检视阅读</label>
+            <label class="task-item" data-task="1"><input type="checkbox" /> 第2天：分析阅读（上）</label>
+            <label class="task-item" data-task="2"><input type="checkbox" /> 第3天：分析阅读（下）</label>
+            <label class="task-item" data-task="3"><input type="checkbox" /> 完成知识图谱探索</label>
+            <label class="task-item" data-task="4"><input type="checkbox" /> 完成测验自评</label>
+            <label class="task-item" data-task="5"><input type="checkbox" /> 撰写读书笔记</label>
+        </div>
+    </div>
+
+    <!-- 知识图谱 -->
+    <div class="card">
+        <h2>🧠 核心知识图谱 <span class="badge">悬停高亮 · 点击查看详情</span></h2>
+        <div class="graph-container">
+            <svg viewBox="0 0 900 520" id="graphSvg" xmlns="http://www.w3.org/2000/svg">
+                <!-- 连线先绘制（底层） -->
+                <g id="edges">
+                    <!-- 层次包含关系 -->
+                    <path class="edge" d="M140,130 L240,130" />
+                    <text class="edge-label" x="190" y="122">包含</text>
+                    <path class="edge" d="M360,130 L460,130" />
+                    <text class="edge-label" x="410" y="122">包含</text>
+                    <path class="edge" d="M580,130 L720,130" />
+                    <text class="edge-label" x="650" y="122">包含</text>
+
+                    <!-- 分析阅读向下拆解 -->
+                    <path class="edge" d="M530,180 L410,260" />
+                    <path class="edge" d="M530,180 L530,260" />
+                    <path class="edge" d="M530,180 L650,260" />
+                    <text class="edge-label" x="440" y="225">规则1-4</text>
+                    <text class="edge-label" x="570" y="225">规则5-8</text>
+                    <text class="edge-label" x="650" y="225">规则9-15</text>
+
+                    <!-- 阶段往下细拆 -->
+                    <path class="edge" d="M280,310 L250,380" />
+                    <path class="edge" d="M390,310 L390,380" />
+                    <path class="edge" d="M500,310 L500,380" />
+                    <text class="edge-label" x="270" y="350">共识</text>
+                    <text class="edge-label" x="390" y="350">主旨</text>
+                    <text class="edge-label" x="500" y="350">论述</text>
+
+                    <!-- 评判下连四标准 -->
+                    <path class="edge" d="M640,310 L560,400" />
+                    <path class="edge" d="M640,310 L620,400" />
+                    <path class="edge" d="M640,310 L680,400" />
+                    <path class="edge" d="M640,310 L720,400" />
+                    <text class="edge-label" x="570" y="365">不足</text>
+                    <text class="edge-label" x="620" y="365">错误</text>
+                    <text class="edge-label" x="680" y="365">不合逻辑</text>
+                    <text class="edge-label" x="740" y="365">不完整</text>
+
+                    <!-- 主动阅读连接四个层次 -->
+                    <path class="edge" d="M450,40 L450,90" stroke-dasharray="4,4" />
+                    <path class="edge" d="M450,40 L140,130" stroke-dasharray="4,4" />
+                    <path class="edge" d="M450,40 L360,130" stroke-dasharray="4,4" />
+                    <path class="edge" d="M450,40 L580,130" stroke-dasharray="4,4" />
+                    <path class="edge" d="M450,40 L720,130" stroke-dasharray="4,4" />
+                    <text class="edge-label" x="470" y="70" fill="#7c3aed">驱动</text>
+
+                    <!-- 主题阅读链接成长 -->
+                    <path class="edge" d="M720,180 L720,460" stroke-dasharray="4,4" />
+                    <text class="edge-label" x="740" y="320" fill="#b45309">目标</text>
+                </g>
+
+                <!-- 节点 -->
+                <g id="nodes">
+
+                    <!-- 主动阅读（中心） -->
+                    <g class="node-group" data-title="主动阅读" data-desc="核心原则：阅读越主动效果越好。读者像捕手，作者像投手，书是球。要提出四个问题：整体谈什么？细部说了什么？有道理吗？跟我有什么关系？" data-color="#7c3aed" transform="translate(450,30)">
+                        <circle r="24" fill="#7c3aed" stroke="#fff" stroke-width="2" />
+                        <text y="2" fill="#fff" font-size="11">主动</text>
+                        <text y="14" fill="#fff" font-size="11">阅读</text>
+                    </g>
+
+                    <!-- 四个层次 -->
+                    <g class="node-group" data-title="基础阅读" data-desc="第一层次。认字、读懂句子。小学阶段完成。解决的问题：'这个句子在说什么？'" data-color="#2563eb" transform="translate(140,130)">
+                        <rect x="-48" y="-20" width="96" height="40" rx="20" fill="#2563eb" stroke="#fff" stroke-width="2" />
+                        <text y="2" fill="#fff" font-size="12">基础阅读</text>
+                    </g>
+
+                    <g class="node-group" data-title="检视阅读" data-desc="第二层次。有限时间内抓出重点。两种方法：（1）有系统略读（6步）；（2）粗浅阅读（先读完一遍，不懂不查）。" data-color="#2563eb" transform="translate(360,130)">
+                        <rect x="-48" y="-20" width="96" height="40" rx="20" fill="#2563eb" stroke="#fff" stroke-width="2" />
+                        <text y="2" fill="#fff" font-size="12">检视阅读</text>
+                    </g>
+
+                    <g class="node-group" data-title="分析阅读" data-desc="第三层次。全盘、优质阅读。15条规则分三阶段：结构（1-4）、诠释（5-8）、评判（9-15）。是本书核心。" data-color="#2563eb" transform="translate(580,130)">
+                        <rect x="-48" y="-20" width="96" height="40" rx="20" fill="#2563eb" stroke="#fff" stroke-width="2" />
+                        <text y="2" fill="#fff" font-size="12">分析阅读</text>
+                    </g>
+
+                    <g class="node-group" data-title="主题阅读" data-desc="第四层次。读多本书回答同一个问题。你是书的主人。准备阶段（列书目+检视）+ 阅读阶段（找章节+中立词汇+提问题+界定议题+分析讨论）。" data-color="#2563eb" transform="translate(720,130)">
+                        <rect x="-48" y="-20" width="96" height="40" rx="20" fill="#2563eb" stroke="#fff" stroke-width="2" />
+                        <text y="2" fill="#fff" font-size="12">主题阅读</text>
+                    </g>
+
+                    <!-- 分析阅读三阶段 -->
+                    <g class="node-group" data-title="阶段一：结构" data-desc="规则1-4：分类、一句话大意、全书纲要、作者要解决的问题。找出一本书的骨架。" data-color="#ea580c" transform="translate(410,270)">
+                        <rect x="-56" y="-18" width="112" height="36" rx="18" fill="#ea580c" stroke="#fff" stroke-width="2" />
+                        <text y="2" fill="#fff" font-size="11">结构（规则1-4）</text>
+                    </g>
+
+                    <g class="node-group" data-title="阶段二：诠释" data-desc="规则5-8：找出共识（关键词）、主旨（关键句）、论述（重新架构）、已解/未解问题。诠释内容。" data-color="#ea580c" transform="translate(530,270)">
+                        <rect x="-56" y="-18" width="112" height="36" rx="18" fill="#ea580c" stroke="#fff" stroke-width="2" />
+                        <text y="2" fill="#fff" font-size="11">诠释（规则5-8）</text>
+                    </g>
+
+                    <g class="node-group" data-title="阶段三：评判" data-desc="规则9-15：读懂再评、不争辩、区分知识/意见、四批评标准（不足/错误/不合逻辑/不完整）。" data-color="#ea580c" transform="translate(640,270)">
+                        <rect x="-56" y="-18" width="112" height="36" rx="18" fill="#ea580c" stroke="#fff" stroke-width="2" />
+                        <text y="2" fill="#fff" font-size="11">评判（规则9-15）</text>
+                    </g>
+
+                    <!-- 诠释细项 -->
+                    <g class="node-group" data-title="达成共识" data-desc="规则5：找出重要单字，确认作者如何使用，双方意义一致。词义是沟通的基础。" data-color="#16a34a" transform="translate(250,390)">
+                        <circle r="18" fill="#16a34a" stroke="#fff" stroke-width="2" />
+                        <text y="2" fill="#fff" font-size="10">共识</text>
+                    </g>
+
+                    <g class="node-group" data-title="找出主旨" data-desc="规则6：从最重要的句子中抓出作者的主旨。用'用自己的话说出来'和'举例说明'两个方法检测。" data-color="#16a34a" transform="translate(390,390)">
+                        <circle r="18" fill="#16a34a" stroke="#fff" stroke-width="2" />
+                        <text y="2" fill="#fff" font-size="10">主旨</text>
+                    </g>
+
+                    <g class="node-group" data-title="架构论述" data-desc="规则7：找出论述，重新架构前因后果。一个论述是一系列主旨的组合，分为归纳和演绎。" data-color="#16a34a" transform="translate(500,390)">
+                        <circle r="18" fill="#16a34a" stroke="#fff" stroke-width="2" />
+                        <text y="2" fill="#fff" font-size="10">论述</text>
+                    </g>
+
+                    <!-- 评判四标准 -->
+                    <g class="node-group" data-title="知识不足" data-desc="作者缺少与问题相关的关键知识。例如达尔文缺乏基因遗传学知识。" data-color="#dc2626" transform="translate(570,410)">
+                        <rect x="-32" y="-14" width="64" height="28" rx="14" fill="#dc2626" stroke="#fff" stroke-width="2" />
+                        <text y="2" fill="#fff" font-size="9">知识不足</text>
+                    </g>
+                    <g class="node-group" data-title="知识错误" data-desc="作者的理念与事实相反。例如亚里士多德对天体的错误认知。" data-color="#dc2626" transform="translate(640,410)">
+                        <rect x="-32" y="-14" width="64" height="28" rx="14" fill="#dc2626" stroke="#fff" stroke-width="2" />
+                        <text y="2" fill="#fff" font-size="9">知识错误</text>
+                    </g>
+                    <g class="node-group" data-title="不合逻辑" data-desc="推论荒谬：缺乏连贯或前后矛盾。例如马基雅维里的'好法律来自好武力'的推论瑕疵。" data-color="#dc2626" transform="translate(710,410)">
+                        <rect x="-32" y="-14" width="64" height="28" rx="14" fill="#dc2626" stroke="#fff" stroke-width="2" />
+                        <text y="2" fill="#fff" font-size="9">不合逻辑</text>
+                    </g>
+                    <g class="node-group" data-title="分析不完整" data-desc="作者未解决所有问题，或未善用资料。例如亚里士多德没预见到代议制民主。" data-color="#dc2626" transform="translate(500,460)">
+                        <rect x="-32" y="-14" width="64" height="28" rx="14" fill="#dc2626" stroke="#fff" stroke-width="2" />
+                        <text y="2" fill="#fff" font-size="9">分析不完整</text>
+                    </g>
+
+                    <!-- 最终目标 -->
+                    <g class="node-group" data-title="心智成长" data-desc="阅读的终极目标。心智如肌肉，不常运用就会萎缩。读超越自己的好书，是保持心智活力的最佳方式。" data-color="#b45309" transform="translate(720,470)">
+                        <rect x="-40" y="-18" width="80" height="36" rx="18" fill="#b45309" stroke="#fff" stroke-width="2" />
+                        <text y="2" fill="#fff" font-size="11">心智成长</text>
+                    </g>
+                </g>
+            </svg>
+        </div>
+        <div class="graph-tip">🖱️ 悬停任一节点 → 淡化非关联节点 · 点击节点 → 下方显示详情</div>
+
+        <!-- 信息面板 -->
+        <div class="info-panel" id="infoPanel">
+            <div class="info-title">📌 点击任意节点</div>
+            <div class="info-desc info-empty">查看详细解释</div>
+        </div>
+    </div>
+
+    <!-- 测验区 -->
+    <div class="card">
+        <h2>✏️ 核心测验 · 自测 <span class="badge">点击按钮看答案</span></h2>
+
+        <div class="quiz-item" id="q1">
+            <div class="q">1. 本书中，作者把读者比作什么？</div>
+            <div class="options">
+                <label><input type="radio" name="q1" value="A" /> A. 投手</label>
+                <label><input type="radio" name="q1" value="B" /> B. 捕手</label>
+                <label><input type="radio" name="q1" value="C" /> C. 棒球</label>
+                <label><input type="radio" name="q1" value="D" /> D. 教练</label>
+            </div>
+            <button class="btn-reveal" onclick="toggleAnswer('ans1')">显示答案</button>
+            <div class="answer" id="ans1">✅ 正确答案：B。读者是捕手，作者是投手，书是球。</div>
+        </div>
+
+        <div class="quiz-item" id="q2">
+            <div class="q">2. 阅读的四个层次，正确的顺序是？</div>
+            <div class="options">
+                <label><input type="radio" name="q2" value="A" /> A. 分析→基础→检视→主题</label>
+                <label><input type="radio" name="q2" value="B" /> B. 基础→检视→分析→主题</label>
+                <label><input type="radio" name="q2" value="C" /> C. 检视→分析→基础→主题</label>
+                <label><input type="radio" name="q2" value="D" /> D. 主题→分析→检视→基础</label>
+            </div>
+            <button class="btn-reveal" onclick="toggleAnswer('ans2')">显示答案</button>
+            <div class="answer" id="ans2">✅ 正确答案：B。基础⊆检视⊆分析⊆主题，下层包含于上层。</div>
+        </div>
+
+        <div class="quiz-item" id="q3">
+            <div class="q">3. 分析阅读的第二阶段（诠释内容）包含以下哪条规则？</div>
+            <div class="options">
+                <label><input type="radio" name="q3" value="A" /> A. 找出作者要解决的问题</label>
+                <label><input type="radio" name="q3" value="B" /> B. 找出重要单字，达成共识</label>
+                <label><input type="radio" name="q3" value="C" /> C. 证明作者不合逻辑</label>
+                <label><input type="radio" name="q3" value="D" /> D. 将书本分类</label>
+            </div>
+            <button class="btn-reveal" onclick="toggleAnswer('ans3')">显示答案</button>
+            <div class="answer" id="ans3">✅ 正确答案：B。A和D是第一阶段（规则1/4），C是第三阶段（规则14）。</div>
+        </div>
+
+        <div class="quiz-item" id="q4">
+            <div class="q">4. 评判一本书时，以下哪项 <strong>不属于</strong> 批评四标准？</div>
+            <div class="options">
+                <label><input type="radio" name="q4" value="A" /> A. 作者知识不足</label>
+                <label><input type="radio" name="q4" value="B" /> B. 作者知识错误</label>
+                <label><input type="radio" name="q4" value="C" /> C. 作者不合逻辑</label>
+                <label><input type="radio" name="q4" value="D" /> D. 作者文笔不好</label>
+            </div>
+            <button class="btn-reveal" onclick="toggleAnswer('ans4')">显示答案</button>
+            <div class="answer" id="ans4">✅ 正确答案：D。四标准是：知识不足、知识错误、不合逻辑、分析不完整。</div>
+        </div>
+
+        <div class="quiz-item" id="q5">
+            <div class="q">5. 本书最后提到，心智与身体的根本区别在于？</div>
+            <div class="options">
+                <label><input type="radio" name="q5" value="A" /> A. 身体会老，心智不会老</label>
+                <label><input type="radio" name="q5" value="B" /> B. 心智可以无限成长，身体有巅峰期</label>
+                <label><input type="radio" name="q5" value="C" /> C. 身体不需要锻炼，心智需要</label>
+                <label><input type="radio" name="q5" value="D" /> D. 心智比身体更容易萎缩</label>
+            </div>
+            <button class="btn-reveal" onclick="toggleAnswer('ans5')">显示答案</button>
+            <div class="answer" id="ans5">✅ 正确答案：B。身体30岁左右达巅峰后走下坡，心智可以持续成长，但必须主动运用。</div>
+        </div>
+    </div>
+
+    <div style="text-align:center;padding:20px 0;color:#94a3b8;font-size:0.85rem;border-top:1px solid #e9edf2;margin-top:20px;">
+        📚 学习包基于《如何阅读一本书》完整文本生成 · 交互式知识图谱 &amp; 测验
+    </div>
+
+    <script>
+        // ========== 进度系统 ==========
+        const taskCheckboxes = document.querySelectorAll('#taskGrid input[type="checkbox"]');
+        const progressFill = document.getElementById('progressFill');
+        const progressStats = document.getElementById('progressStats');
+
+        function updateProgress() {
+            const checked = document.querySelectorAll('#taskGrid input[type="checkbox"]:checked').length;
+            const total = taskCheckboxes.length;
+            const pct = Math.round((checked / total) * 100);
+            progressFill.style.width = pct + '%';
+            progressStats.textContent = checked + ' / ' + total + ' 已完成';
+            // 加删除线
+            document.querySelectorAll('.task-item').forEach((el, idx) => {
+                const cb = el.querySelector('input[type="checkbox"]');
+                if (cb.checked) el.classList.add('done');
+                else el.classList.remove('done');
+            });
+        }
+
+        taskCheckboxes.forEach(cb => {
+            cb.addEventListener('change', updateProgress);
+            // 从 localStorage 恢复
+            const key = 'task_' + cb.parentElement.dataset.task;
+            if (localStorage.getItem(key) === 'true') {
+                cb.checked = true;
+            }
+        });
+        // 保存状态
+        document.querySelectorAll('.task-item').forEach(el => {
+            const cb = el.querySelector('input[type="checkbox"]');
+            cb.addEventListener('change', function() {
+                localStorage.setItem('task_' + el.dataset.task, this.checked);
+            });
+        });
+        updateProgress();
+
+        // ========== 知识图谱交互 ==========
+        const nodes = document.querySelectorAll('.node-group');
+        const edges = document.querySelectorAll('.edge, .edge-label');
+        const infoPanel = document.getElementById('infoPanel');
+        const infoTitle = infoPanel.querySelector('.info-title');
+        const infoDesc = infoPanel.querySelector('.info-desc');
+
+        // 存储节点关系（用于高亮）。此处使用简单策略：悬停时高亮该节点，淡化所有其他节点和边。
+        function getNodeId(node) {
+            // 用transform中的translate大致定位，或使用innerText
+            const title = node.dataset.title || 'node';
+            return title;
+        }
+
+        nodes.forEach(node => {
+            // 悬停：高亮该节点，淡化其他
+            node.addEventListener('mouseenter', function(e) {
+                const current = this;
+                // 所有节点淡化
+                nodes.forEach(n => {
+                    if (n !== current) {
+                        n.style.opacity = '0.25';
+                    } else {
+                        n.style.opacity = '1';
+                    }
+                });
+                edges.forEach(e => {
+                    e.style.opacity = '0.25';
+                });
+                // 当前节点的相关边可以保留但不做复杂逻辑，整体淡化即可
+                // 为美观，让当前节点的circle/rect亮一点
+                this.style.filter = 'drop-shadow(0 0 6px rgba(59,130,246,0.5))';
+            });
+
+            node.addEventListener('mouseleave', function() {
+                nodes.forEach(n => {
+                    n.style.opacity = '1';
+                    n.style.filter = 'none';
+                });
+                edges.forEach(e => {
+                    e.style.opacity = '1';
+                });
+            });
+
+            // 点击：显示详情
+            node.addEventListener('click', function(e) {
+                const title = this.dataset.title || '概念';
+                const desc = this.dataset.desc || '暂无详细描述。';
+                const color = this.dataset.color || '#3b82f6';
+                infoTitle.textContent = '📌 ' + title;
+                infoDesc.textContent = desc;
+                infoDesc.className = 'info-desc';
+                infoPanel.style.borderLeftColor = color;
+                // 高亮点击反馈
+                nodes.forEach(n => n.style.opacity = '0.4');
+                this.style.opacity = '1';
+                // 可略微突出
+                setTimeout(() => {
+                    nodes.forEach(n => n.style.opacity = '1');
+                }, 1200);
+            });
+        });
+
+        // 默认显示提示，但加一个默认点击“分析阅读”
+        setTimeout(() => {
+            const defaultNode = document.querySelector('[data-title="分析阅读"]');
+            if (defaultNode) {
+                defaultNode.click();
+            }
+        }, 400);
+
+        // ========== 测验功能 ==========
+        function toggleAnswer(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.toggle('show');
+            }
+        }
+
+        // 自动统计测验完成度（检查是否所有都点击过）
+        // 简单化，在测验区加一个监听（可选），但不强制。
+        console.log('📖 学习包已加载！');
+    </script>
+</body>
+                                                                           </html>
